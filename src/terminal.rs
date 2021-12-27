@@ -1,7 +1,7 @@
 use crate::Position;
 use crate::Size;
 use crossterm::cursor::{Hide, MoveTo, Show};
-use crossterm::event::{self, Event, KeyEvent};
+use crossterm::event::{self, Event};
 use crossterm::execute;
 use crossterm::style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen};
@@ -10,9 +10,9 @@ use std::io::{self, Write};
 pub struct Terminal;
 
 impl Terminal {
-    pub fn read_key() -> crossterm::Result<KeyEvent> {
+    pub fn read_event() -> crossterm::Result<Event> {
         loop {
-            if let Event::Key(event) = event::read()? {
+            if let Ok(event) = event::read() {
                 return Ok(event);
             }
         }
@@ -36,7 +36,7 @@ impl Terminal {
 
     pub fn size() -> crossterm::Result<Size> {
         let (width, height) = terminal::size()?;
-        Ok(Size::new(width, height - 2)) // Subtract 2 because of the status bar
+        Ok(Size::new(width, height - 2))
     }
 
     pub fn clear_all() -> crossterm::Result<()> {

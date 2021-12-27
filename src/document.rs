@@ -3,6 +3,7 @@ use crate::Row;
 use std::io::Write;
 use std::{cmp, fs};
 
+#[derive(Default, Clone)]
 pub struct Document {
     pub filename: Option<String>,
     rows: Vec<Row>,
@@ -12,7 +13,7 @@ pub struct Document {
 impl Document {
     pub fn open(filename: &str) -> Document {
         let rows: Vec<Row> = if let Ok(contents) = fs::read_to_string(filename) {
-            contents.lines().map(|row| Row::from(row)).collect()
+            contents.lines().map(Row::from).collect()
         } else {
             Vec::new()
         };
@@ -24,12 +25,8 @@ impl Document {
         }
     }
 
-    pub fn default() -> Document {
-        Document {
-            rows: Vec::new(),
-            filename: None,
-            dirty: false,
-        }
+    pub fn is_dirty(&self) -> bool {
+        self.dirty
     }
 
     pub fn len(&self) -> usize {
@@ -62,19 +59,18 @@ impl Document {
 
         if at.y == self.len() as u16 {
             self.rows.push(Row::default());
-            return;
+        } else {
+            let row = self
+                .rows
+                .get_mut(at.y as usize)
+                .unwrap()
+                .split(at.x as usize);
+            self.rows.insert((at.y + 1) as usize, row);
         }
-
-        let row = self
-            .rows
-            .get_mut(at.y as usize)
-            .unwrap()
-            .split(at.x as usize);
-        self.rows.insert((at.y + 1) as usize, row);
     }
 
     pub fn delete(&mut self, at: &Position) {
-        if (at.y as usize) >= self.len() {
+        if at.y >= self.len() as u16 {
             return;
         }
 
@@ -103,9 +99,5 @@ impl Document {
         self.dirty = false;
 
         Ok(())
-    }
-
-    pub fn is_dirty(&self) -> bool {
-        self.dirty
     }
 }

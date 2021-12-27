@@ -14,8 +14,8 @@ impl From<&str> for StatusMessage {
     }
 }
 
-impl StatusMessage {
-    pub fn new() -> StatusMessage {
+impl Default for StatusMessage {
+    fn default() -> StatusMessage {
         StatusMessage {
             text: String::new(),
             time: Instant::now(),

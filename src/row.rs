@@ -1,5 +1,6 @@
 use std::{cmp, fmt};
 
+#[derive(Default, Clone)]
 pub struct Row {
     string: String,
 }
@@ -19,12 +20,6 @@ impl fmt::Display for Row {
 }
 
 impl Row {
-    pub fn default() -> Row {
-        Row {
-            string: String::new(),
-        }
-    }
-
     pub fn render(&self, start: usize, end: usize) -> &str {
         &self.string[cmp::min(start, self.len())..cmp::min(end, self.len())]
     }
