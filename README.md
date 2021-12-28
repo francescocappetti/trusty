@@ -1,8 +1,6 @@
 ## trusty
 A dead simple text editor completely written in Rust.
 
-![Screenshot](screenshot.png)
-
 ### Installation
 1. Go to the [release](https://github.com/francescocappetti/trusty/releases) tab and download the latest executable.
 2. `cd` to the directory where you downloaded the file.
@@ -14,3 +12,4 @@ Run the editor with `./trusty <filename>` if the file name isn't specified, the 
 ### Keybindings
 - `CTRL-Q` = quit
 - `CTRL-S` = save
+- `CTRL-F` = find
