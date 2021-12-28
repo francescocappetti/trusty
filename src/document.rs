@@ -100,4 +100,14 @@ impl Document {
 
         Ok(())
     }
+
+    pub fn find(&self, query: &str) -> Option<Position> {
+        for (y, row) in self.rows.iter().enumerate() {
+            if let Some(x) = row.find(query) {
+                return Some(Position::new(x as u16, y as u16));
+            }
+        }
+
+        None
+    }
 }

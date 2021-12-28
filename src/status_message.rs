@@ -5,10 +5,10 @@ pub struct StatusMessage {
     pub time: Instant,
 }
 
-impl From<&str> for StatusMessage {
-    fn from(message: &str) -> StatusMessage {
+impl From<String> for StatusMessage {
+    fn from(message: String) -> StatusMessage {
         StatusMessage {
-            text: message.to_string(),
+            text: message,
             time: Instant::now(),
         }
     }

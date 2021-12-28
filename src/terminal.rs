@@ -36,7 +36,7 @@ impl Terminal {
 
     pub fn size() -> crossterm::Result<Size> {
         let (width, height) = terminal::size()?;
-        Ok(Size::new(width, height - 2))
+        Ok(Size::new(width, height.saturating_sub(2)))
     }
 
     pub fn clear_all() -> crossterm::Result<()> {

@@ -4,8 +4,8 @@ use crate::StatusMessage;
 use crate::Terminal;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::style::Color;
-use std::env;
 use std::time::{Duration, Instant};
+use std::{cmp, env};
 
 const FG_COLOR: Color = Color::White;
 const BG_COLOR: Color = Color::Black;
@@ -40,7 +40,7 @@ impl Default for Editor {
             document,
             offset: Position::default(),
             status_message: StatusMessage::from(
-                "[HELP] CTRL-Q = quit | CTRL-S = save | CTRL-Z = undo | CTRL-Y = redo",
+                "[HELP] CTRL-Q = quit | CTRL-S = save | CTRL-F = find".to_string(),
             ),
         }
     }
@@ -85,13 +85,14 @@ impl Editor {
                     modifiers: KeyModifiers::CONTROL,
                 } => {
                     if self.document.is_dirty() {
-                        if matches!(
-                            &self.prompt("Are you sure you want to quit without saving? [Y/n]")?[..],
-                            "Y"
-                        ) {
-                            self.running = false;
-                        } else {
-                            self.status_message = StatusMessage::from("[WARNING] File not saved");
+                        match self.prompt("Type 'y' to quit without saving: ")? {
+                            Some(response) if response.to_lowercase().as_str() == "y" => {
+                                self.running = false
+                            }
+                            _ => {
+                                self.status_message =
+                                    StatusMessage::from("[WARNING] File not saved".to_string())
+                            }
                         }
                     } else {
                         self.running = false;
@@ -104,25 +105,30 @@ impl Editor {
                     if self.document.filename.is_some() {
                         self.document.save()?;
                     } else {
-                        self.document.filename = Some(self.prompt("Save As:")?);
-                        self.document.save()?;
+                        let filename = self.prompt("Save as: ")?;
+
+                        if filename.is_some() {
+                            self.document.filename = filename;
+                            self.document.save()?;
+                        } else {
+                            self.status_message =
+                                StatusMessage::from("[WARNING] File not saved".to_string());
+                        }
                     }
                 }
                 KeyEvent {
-                    code: KeyCode::Char('z'),
+                    code: KeyCode::Char('f'),
                     modifiers: KeyModifiers::CONTROL,
                 } => {
-                    // if let Some(position) = self.history.undo(&mut self.document) {
-                    //     self.cursor_position = position;
-                    // }
-                }
-                KeyEvent {
-                    code: KeyCode::Char('y'),
-                    modifiers: KeyModifiers::CONTROL,
-                } => {
-                    // if let Some(position) = self.history.redo(&mut self.document) {
-                    //     self.cursor_position = position;
-                    // }
+                    if let Some(query) = self.prompt("Search: ")? {
+                        if let Some(position) = self.document.find(&query) {
+                            self.cursor_position = position;
+                            self.scroll()?;
+                        } else {
+                            self.status_message =
+                                StatusMessage::from("[WARNING] Search query not found".to_string());
+                        }
+                    }
                 }
                 KeyEvent {
                     code: direction @ (KeyCode::Up | KeyCode::Down | KeyCode::Left | KeyCode::Right),
@@ -200,6 +206,10 @@ impl Editor {
     }
 
     fn draw_status_bar(&self) -> crossterm::Result<()> {
+        if Terminal::size()?.height == 0 {
+            return Ok(());
+        }
+
         let width = Terminal::size()?.width as usize;
 
         let filename = if let Some(filename) = &self.document.filename {
@@ -324,17 +334,21 @@ impl Editor {
         Ok(())
     }
 
-    fn prompt(&mut self, prompt: &str) -> crossterm::Result<String> {
+    fn prompt(&mut self, prompt: &str) -> crossterm::Result<Option<String>> {
         let mut result = String::new();
 
-        let mut cursor_position =
-            Position::new(prompt.len() as u16 + 1, Terminal::size()?.height + 1);
+        let mut cursor_position = Position::new(prompt.len() as u16, Terminal::size()?.height + 1);
         let mut offset = 0;
 
         loop {
-            self.status_message =
-                StatusMessage::from(&format!("{} {}", prompt, &result[offset..result.len()])[..]);
+            let end = offset + Terminal::size()?.width as usize;
+            self.status_message = StatusMessage::from(format!(
+                "{}{}",
+                prompt,
+                result[cmp::min(offset, result.len())..cmp::min(end, result.len())].to_string()
+            ));
             self.refresh_screen()?;
+
             Terminal::cursor_position(&cursor_position)?;
 
             if let Event::Key(key) = Terminal::read_event()? {
@@ -358,7 +372,7 @@ impl Editor {
                         if !result.is_empty() {
                             result.pop();
 
-                            if cursor_position.x > prompt.len() as u16 + 1 {
+                            if cursor_position.x > prompt.len() as u16 {
                                 cursor_position.x -= 1;
                             } else {
                                 offset -= 1;
@@ -372,11 +386,17 @@ impl Editor {
                         self.status_message = StatusMessage::default();
                         break;
                     }
+                    KeyEvent {
+                        code: KeyCode::Esc,
+                        modifiers: KeyModifiers::NONE,
+                    } => {
+                        return Ok(None);
+                    }
                     _ => {}
                 }
             }
         }
 
-        Ok(result)
+        Ok(Some(result))
     }
 }
