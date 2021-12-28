@@ -2,6 +2,14 @@
 name = "trusty"
 version = "0.1.0"
 edition = "2021"
+authors = ["Francesco Cappetti <f.cappetti.05@gmail.com>"]
+license = "MIT"
+description = "A dead simple text editor completely written in Rust."
+readme = "README.md"
+homepage = "https://github.com/francescocappetti/trusty"
+repository = "https://github.com/francescocappetti/trusty"
+keywords = ["terminal", "code", "text", "editor"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 crossterm = "0.22.1"
