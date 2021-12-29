@@ -9,7 +9,7 @@ A dead simple text editor completely written in Rust.
 5. You can run the editor by typing `trusty`.
 
 ### Usage
-Run the editor with `./trusty <filename>` if the file name isn't specified, the editor will create an unnamed file.
+Run the editor with `trusty <filename>` if the file name isn't specified, the editor will create an unnamed file.
 
 ### Keybindings
 - `CTRL-Q` = quit
