@@ -14,4 +14,4 @@ Run the editor with `trusty <filename>` if the file name isn't specified, the ed
 ## Keybindings
 - `CTRL-Q` = quit
 - `CTRL-S` = save
-- `CTRL-F` = findfrancescocappetti
+- `CTRL-F` = find
