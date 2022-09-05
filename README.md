@@ -36,3 +36,6 @@ Run the editor with `trusty <filename>` if the file name isn't specified, the ed
 - `CTRL-Q` = quit
 - `CTRL-S` = save
 - `CTRL-F` = find
+
+## Credits
+I followed [this](https://www.philippflenker.com/hecto/) amazing series by Philipp Flenker, but decided to use `crossterm` instead of `termion`.
