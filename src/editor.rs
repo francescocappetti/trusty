@@ -195,7 +195,7 @@ impl Editor {
                 let row = row.render(self.offset.x as usize, (self.offset.x + width) as usize);
 
                 Terminal::set_fg_color(FG_COLOR)?;
-                println!("{}\r", row);
+                println!("{row}\r");
             } else {
                 Terminal::set_fg_color(TILDES_COLOR)?;
                 println!("~\r");
@@ -233,12 +233,12 @@ impl Editor {
                 String::new()
             };
 
-        let mut bar = format!("{}{}{}{}", filename, dirty, spaces, position);
+        let mut bar = format!("{filename}{dirty}{spaces}{position}");
         bar.truncate(width);
 
         Terminal::set_bg_color(STATUS_BAR_BG_COLOR)?;
         Terminal::set_fg_color(STATUS_BAR_FG_COLOR)?;
-        println!("{}\r", bar);
+        println!("{bar}\r");
         Terminal::reset_color()
     }
 
@@ -249,7 +249,7 @@ impl Editor {
             let mut message = self.status_message.text.clone();
             message.truncate(Terminal::size()?.width as usize);
 
-            print!("{}", message);
+            print!("{message}");
         }
 
         Ok(())
@@ -345,7 +345,7 @@ impl Editor {
             self.status_message = StatusMessage::from(format!(
                 "{}{}",
                 prompt,
-                result[cmp::min(offset, result.len())..cmp::min(end, result.len())].to_string()
+                &result[cmp::min(offset, result.len())..cmp::min(end, result.len())]
             ));
             self.refresh_screen()?;
 

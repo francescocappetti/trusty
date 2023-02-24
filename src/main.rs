@@ -1,3 +1,5 @@
+#![allow(clippy::len_without_is_empty)]
+
 mod document;
 mod editor;
 mod position;
